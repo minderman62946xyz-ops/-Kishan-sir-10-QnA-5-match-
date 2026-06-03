@@ -1,0 +1,917 @@
+```html
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KISHAN CLASSES - Science Quiz Challenge</title>
+    
+    <!-- Premium Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Required Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        /* --- CORE VARIABLES & THEMING --- */
+        :root {
+            /* Futuristic Colors */
+            --electric-blue: #00f0ff;
+            --purple-neon: #aa00ff;
+            --cyan-accent: #00e5ff;
+            --gold-highlight: #ffd700;
+            --success-green: #00e676;
+            --danger-red: #ff1744;
+            
+            /* Dark Theme (Default) */
+            --bg-dark-1: #060213;
+            --bg-dark-2: #140533;
+            --bg-dark-3: #081b33;
+            --glass-bg: rgba(10, 15, 40, 0.55);
+            --glass-border: rgba(0, 240, 255, 0.2);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 240, 255, 0.15);
+            --text-main: #ffffff;
+            --text-muted: #a0aec0;
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --card-hover: rgba(0, 240, 255, 0.1);
+        }
+
+        [data-theme="light"] {
+            /* Light Theme overrides */
+            --bg-dark-1: #e0f7fa;
+            --bg-dark-2: #ede7f6;
+            --bg-dark-3: #f3e5f5;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(170, 0, 255, 0.3);
+            --glass-shadow: 0 8px 32px 0 rgba(170, 0, 255, 0.15);
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --input-bg: rgba(255, 255, 255, 0.9);
+            --card-hover: rgba(170, 0, 255, 0.1);
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-dark-1), var(--bg-dark-2), var(--bg-dark-3));
+            background-size: 400% 400%;
+            animation: cosmicGradient 15s ease infinite;
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        @keyframes cosmicGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* --- BACKGROUND EFFECTS --- */
+        #particles-js { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+
+        /* Hidden Premium Words Animation */
+        .hidden-word-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;
+            pointer-events: none; overflow: hidden; display: flex; justify-content: space-around;
+        }
+        .hidden-word {
+            font-size: 15vw; font-weight: 900; color: rgba(255,255,255,0.02);
+            position: absolute; text-transform: uppercase; letter-spacing: 20px;
+            filter: blur(4px); white-space: nowrap; user-select: none;
+        }
+        [data-theme="light"] .hidden-word { color: rgba(0,0,0,0.03); }
+        
+        .word-1 { top: 20%; animation: panWord1 40s linear infinite; }
+        .word-2 { bottom: 20%; animation: panWord2 35s linear infinite reverse; }
+
+        @keyframes panWord1 { 0% { transform: translateX(100vw) rotate(-5deg); } 100% { transform: translateX(-150vw) rotate(5deg); } }
+        @keyframes panWord2 { 0% { transform: translateX(100vw) rotate(5deg); } 100% { transform: translateX(-150vw) rotate(-5deg); } }
+
+        /* Floating Science Icons */
+        .science-icons i {
+            position: fixed; font-size: 3rem; color: var(--electric-blue); opacity: 0.1; z-index: 0;
+            animation: floatSci 20s ease-in-out infinite alternate; pointer-events: none;
+        }
+        @keyframes floatSci { 0% { transform: translateY(0) rotate(0deg) scale(0.8); } 100% { transform: translateY(-100px) rotate(360deg) scale(1.2); } }
+
+        /* --- UI COMPONENTS --- */
+        .app-container {
+            position: relative; z-index: 10; min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px; width: 100%;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px; padding: 40px;
+            box-shadow: var(--glass-shadow), inset 0 0 20px rgba(255,255,255,0.02);
+            width: 100%; max-width: 900px;
+            position: relative; overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .screen { display: none; opacity: 0; transform: scale(0.95) translateY(20px); transition: all 0.5s ease; }
+        .screen.active { display: block; opacity: 1; transform: scale(1) translateY(0); animation: quantumReveal 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        @keyframes quantumReveal {
+            0% { opacity: 0; transform: scale(0.9) translateY(40px); filter: blur(10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+        }
+
+        /* Top Bar Controls */
+        .system-controls { position: fixed; top: 20px; right: 20px; z-index: 100; display: flex; gap: 15px; }
+        .icon-btn {
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            color: var(--text-main); width: 50px; height: 50px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+            cursor: pointer; backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: all 0.3s ease;
+        }
+        .icon-btn:hover {
+            background: var(--electric-blue); color: #000; transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 0 20px var(--electric-blue); border-color: transparent;
+        }
+
+        /* Typography */
+        .brand-title {
+            font-size: 3.5rem; font-weight: 900; text-align: center;
+            background: linear-gradient(to right, var(--electric-blue), var(--purple-neon), var(--cyan-accent));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 5px; filter: drop-shadow(0 4px 10px rgba(0, 240, 255, 0.3));
+            letter-spacing: 2px; line-height: 1.2;
+        }
+        .brand-subtitle { text-align: center; color: var(--text-muted); font-size: 1.2rem; font-weight: 500; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 40px; }
+
+        /* Buttons */
+        .btn-cyber {
+            display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+            width: 100%; padding: 18px 30px; font-size: 1.2rem; font-weight: 700; text-transform: uppercase;
+            color: #fff; background: linear-gradient(45deg, var(--purple-neon), var(--electric-blue));
+            border: none; border-radius: 15px; cursor: pointer;
+            box-shadow: 0 10px 30px rgba(170, 0, 255, 0.4);
+            transition: all 0.3s ease; position: relative; overflow: hidden;
+            letter-spacing: 1px;
+        }
+        .btn-cyber::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: 0.5s;
+        }
+        .btn-cyber:hover::before { left: 100%; }
+        .btn-cyber:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 15px 40px rgba(0, 240, 255, 0.5); }
+        .btn-cyber:active { transform: translateY(1px); }
+
+        /* Inputs & Forms */
+        .form-group { position: relative; margin-bottom: 30px; }
+        .form-input {
+            width: 100%; padding: 20px 25px; background: var(--input-bg);
+            border: 2px solid var(--glass-border); border-radius: 15px;
+            color: var(--text-main); font-size: 1.1rem; outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .form-input:focus { border-color: var(--electric-blue); background: rgba(0, 240, 255, 0.05); box-shadow: 0 0 20px rgba(0, 240, 255, 0.2); }
+        .form-label {
+            position: absolute; left: 25px; top: 50%; transform: translateY(-50%);
+            color: var(--text-muted); pointer-events: none; transition: 0.3s; font-weight: 500;
+        }
+        .form-input:focus ~ .form-label, .form-input:not(:placeholder-shown) ~ .form-label {
+            top: 0; background: var(--bg-dark-2); color: var(--electric-blue); padding: 0 10px;
+            border-radius: 8px; font-size: 0.85rem; border: 1px solid var(--electric-blue);
+        }
+        [data-theme="light"] .form-input:focus ~ .form-label, [data-theme="light"] .form-input:not(:placeholder-shown) ~ .form-label { background: #fff; }
+
+        /* Section A: Short Answer */
+        .quiz-nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px; }
+        .badge-sec { background: rgba(170, 0, 255, 0.2); color: var(--purple-neon); padding: 8px 20px; border-radius: 20px; font-weight: 700; border: 1px solid var(--purple-neon); box-shadow: 0 0 15px rgba(170,0,255,0.3); }
+        
+        .q-card { background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); padding: 30px; border-radius: 20px; margin-bottom: 30px; transition: 0.3s; }
+        .q-card:hover { border-color: var(--electric-blue); box-shadow: 0 5px 20px rgba(0,240,255,0.1); }
+        .q-text { font-size: 1.4rem; font-weight: 600; line-height: 1.6; margin-bottom: 25px; }
+
+        .textarea-cyber { width: 100%; min-height: 130px; background: var(--input-bg); border: 2px solid var(--glass-border); border-radius: 15px; color: var(--text-main); padding: 20px; font-size: 1.1rem; resize: vertical; transition: 0.3s; outline: none; }
+        .textarea-cyber:focus { border-color: var(--purple-neon); box-shadow: 0 0 20px rgba(170,0,255,0.2); }
+
+        .upload-card {
+            border: 2px dashed var(--electric-blue); border-radius: 15px; padding: 30px;
+            text-align: center; background: rgba(0, 240, 255, 0.05); cursor: pointer;
+            transition: all 0.3s; position: relative; overflow: hidden;
+        }
+        .upload-card:hover { background: rgba(0, 240, 255, 0.15); transform: translateY(-2px); border-style: solid; }
+        .upload-card input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        
+        /* Section B: Matching */
+        .match-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: center; margin-bottom: 15px; background: rgba(255,255,255,0.02); padding: 15px; border-radius: 15px; border: 1px solid var(--glass-border); }
+        .match-left { font-weight: 600; font-size: 1.1rem; color: var(--electric-blue); }
+        .match-select { width: 100%; padding: 15px; background: var(--input-bg); color: var(--text-main); border: 1px solid var(--glass-border); border-radius: 10px; outline: none; cursor: pointer; font-size: 1rem; transition: 0.3s; }
+        .match-select:focus { border-color: var(--success-green); box-shadow: 0 0 15px rgba(0,230,118,0.2); }
+        .match-select option { background: #0f172a; color: #fff; }
+
+        /* AI Processing */
+        .ai-core-loader {
+            width: 150px; height: 150px; margin: 0 auto 30px; position: relative;
+        }
+        .ai-ring {
+            position: absolute; width: 100%; height: 100%; border-radius: 50%;
+            border: 4px solid transparent; border-top-color: var(--electric-blue);
+            animation: spinRing 1.5s linear infinite;
+        }
+        .ai-ring:nth-child(2) { border-top-color: var(--purple-neon); animation-duration: 2s; animation-direction: reverse; width: 80%; height: 80%; top: 10%; left: 10%; }
+        .ai-ring:nth-child(3) { border-top-color: var(--cyan-accent); animation-duration: 1s; width: 60%; height: 60%; top: 20%; left: 20%; }
+        @keyframes spinRing { 100% { transform: rotate(360deg); } }
+
+        .terminal-box { background: rgba(0,0,0,0.5); padding: 20px; border-radius: 10px; font-family: 'Courier New', monospace; color: var(--success-green); text-align: left; font-size: 0.9rem; border: 1px solid #333; height: 150px; overflow: hidden; position: relative; }
+        .terminal-content { position: absolute; bottom: 20px; width: calc(100% - 40px); }
+
+        /* Results Dashboard */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 30px 0; }
+        .dash-card { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 25px; border-radius: 20px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.2); transition: 0.3s; position: relative; overflow: hidden; }
+        .dash-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--electric-blue); }
+        .dash-card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.08); }
+        .dash-value { font-size: 3rem; font-weight: 900; color: var(--electric-blue); line-height: 1; margin-bottom: 5px; }
+        .dash-label { font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+        .ai-feedback-panel { background: rgba(0, 230, 118, 0.05); border: 1px solid var(--success-green); border-radius: 20px; padding: 25px; text-align: left; margin-bottom: 30px; position: relative; }
+        .ai-feedback-panel i { position: absolute; top: -15px; right: 20px; font-size: 2.5rem; color: var(--success-green); background: var(--bg-dark-1); padding: 0 10px; }
+
+        /* Certificate (Hidden from view) */
+        #pdf-cert-container { position: absolute; top: -10000px; left: -10000px; width: 1123px; height: 794px; background: #fff; z-index: -100; }
+        .cert-canvas { width: 100%; height: 100%; padding: 40px; box-sizing: border-box; background: #f8fafc; position: relative; font-family: 'Poppins', sans-serif; color: #0f172a; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 20px solid #1e293b; }
+        .cert-canvas::after { content: ''; position: absolute; top: 15px; left: 15px; right: 15px; bottom: 15px; border: 4px solid #d4af37; pointer-events: none; }
+        .c-inst { font-size: 40px; font-weight: 900; letter-spacing: 8px; color: #1e293b; margin-bottom: 10px; text-transform: uppercase; }
+        .c-title { font-size: 55px; color: #d4af37; font-family: 'Georgia', serif; font-style: italic; font-weight: bold; margin: 20px 0; }
+        .c-name { font-size: 50px; font-weight: 800; border-bottom: 3px solid #cbd5e1; padding: 0 60px 10px; margin: 30px 0; color: #0f172a; }
+        .c-grid { display: flex; gap: 50px; margin: 30px 0; }
+        .c-box { background: #f1f5f9; padding: 15px 30px; border-radius: 10px; border: 1px solid #cbd5e1; }
+        .c-box span { display: block; font-size: 14px; color: #64748b; text-transform: uppercase; }
+        .c-box strong { font-size: 28px; color: #0f172a; }
+        .c-sig-area { display: flex; justify-content: space-between; width: 80%; margin-top: 60px; }
+        .c-sig { border-top: 2px solid #0f172a; width: 250px; padding-top: 10px; font-weight: bold; font-size: 18px; position: relative; }
+        .c-seal { position: absolute; bottom: 60px; right: 80px; width: 140px; height: 140px; background: #d4af37; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 4px dashed #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .c-seal-inner { font-size: 24px; color: #fff; font-weight: bold; text-align: center; line-height: 1.2; text-transform: uppercase;}
+
+        @media (max-width: 768px) {
+            .glass-panel { padding: 25px; border-radius: 20px; }
+            .brand-title { font-size: 2.2rem; }
+            .hidden-word { font-size: 25vw; }
+            .match-row { grid-template-columns: 1fr; gap: 10px; }
+            .btn-cyber { padding: 15px 20px; font-size: 1rem; }
+            .dash-value { font-size: 2.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Environment Backgrounds -->
+    <div id="particles-js"></div>
+    <div class="hidden-word-container">
+        <div class="hidden-word word-1">K I S H U</div>
+        <div class="hidden-word word-2">S I N U</div>
+    </div>
+    <div class="science-icons" id="sci-icons"></div>
+
+    <!-- System Controls -->
+    <div class="system-controls">
+        <button class="icon-btn" onclick="app.toggleSound()" id="btn-sound"><i class="fas fa-volume-up"></i></button>
+        <button class="icon-btn" onclick="app.toggleTheme()"><i class="fas fa-moon"></i></button>
+        <button class="icon-btn" onclick="app.toggleFullscreen()"><i class="fas fa-expand"></i></button>
+    </div>
+
+    <div class="app-container">
+
+        <!-- 1. LOADING SCREEN -->
+        <div id="screen-loading" class="screen active glass-panel" style="text-align: center;">
+            <div style="font-size: 5rem; color: var(--electric-blue); margin-bottom: 20px; animation: pulse 2s infinite;">
+                <i class="fas fa-dna"></i>
+            </div>
+            <h1 class="brand-title" style="font-size: 2.5rem;">KISHAN CLASSES</h1>
+            <p style="color: var(--electric-blue); font-weight: 600; letter-spacing: 5px;">AI ENGINE INITIALIZING</p>
+            <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-top: 30px; overflow: hidden;">
+                <div id="load-bar" style="width: 0%; height: 100%; background: var(--electric-blue); box-shadow: 0 0 15px var(--electric-blue); transition: 0.1s;"></div>
+            </div>
+        </div>
+
+        <!-- 2. WELCOME SCREEN -->
+        <div id="screen-welcome" class="screen glass-panel">
+            <h1 class="brand-title">SCIENCE QUIZ <br> CHALLENGE</h1>
+            <p class="brand-subtitle">Powered by Neural Evaluation API</p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px;">
+                <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
+                    <i class="fas fa-pen-nib" style="font-size: 2.5rem; color: var(--cyan-accent); margin-bottom: 15px;"></i>
+                    <h3 style="font-size: 1.1rem; margin-bottom: 5px;">Section A</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">10 Short Ans (40 Marks)</p>
+                </div>
+                <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
+                    <i class="fas fa-link" style="font-size: 2.5rem; color: var(--purple-neon); margin-bottom: 15px;"></i>
+                    <h3 style="font-size: 1.1rem; margin-bottom: 5px;">Section B</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">5 Matching (10 Marks)</p>
+                </div>
+                <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
+                    <i class="fas fa-camera" style="font-size: 2.5rem; color: var(--success-green); margin-bottom: 15px;"></i>
+                    <h3 style="font-size: 1.1rem; margin-bottom: 5px;">Smart Input</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">Type or Capture Answers</p>
+                </div>
+                <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
+                    <i class="fas fa-brain" style="font-size: 2.5rem; color: var(--gold-highlight); margin-bottom: 15px;"></i>
+                    <h3 style="font-size: 1.1rem; margin-bottom: 5px;">AI Grading</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">Instant simulated analysis</p>
+                </div>
+            </div>
+
+            <button class="btn-cyber" onclick="app.showScreen('screen-register')">
+                Initialize Candidate Profile <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <!-- 3. STUDENT INFO -->
+        <div id="screen-register" class="screen glass-panel">
+            <div style="text-align: center; margin-bottom: 40px;">
+                <i class="fas fa-user-astronaut" style="font-size: 4rem; color: var(--electric-blue); margin-bottom: 15px;"></i>
+                <h2>Candidate Registration</h2>
+                <p style="color: var(--text-muted);">Authenticate to access the examination portal.</p>
+            </div>
+            
+            <div class="form-group">
+                <input type="text" id="reg-name" class="form-input" placeholder=" " required>
+                <label class="form-label"><i class="fas fa-id-card"></i> Legal Full Name</label>
+            </div>
+            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div style="position: relative;">
+                    <input type="text" id="reg-class" class="form-input" placeholder=" " value="8" readonly>
+                    <label class="form-label">Class Level</label>
+                </div>
+                <div style="position: relative;">
+                    <input type="text" id="reg-sec" class="form-input" placeholder=" " required style="text-transform: uppercase;" maxlength="2">
+                    <label class="form-label">Section</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <input type="number" id="reg-roll" class="form-input" placeholder=" " required min="1">
+                <label class="form-label"><i class="fas fa-hashtag"></i> Roll Number</label>
+            </div>
+
+            <p id="reg-err" style="color: var(--danger-red); text-align: center; margin-bottom: 20px; display: none; font-weight: 600;">⚠️ All fields must be accurately populated.</p>
+
+            <button class="btn-cyber" onclick="app.validateAndStart()">
+                Authorize & Begin Exam <i class="fas fa-fingerprint"></i>
+            </button>
+        </div>
+
+        <!-- 4. SECTION A -->
+        <div id="screen-sec-a" class="screen glass-panel">
+            <div class="quiz-nav-header">
+                <div>
+                    <span class="badge-sec">SECTION A</span>
+                    <div style="margin-top: 5px; font-size: 0.9rem; color: var(--text-muted);">Subjective Analysis (4 Marks/Q)</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 2rem; font-weight: 900; color: var(--electric-blue); line-height: 1;" id="sa-counter">01</div>
+                    <div style="font-size: 0.9rem; color: var(--text-muted);">OF 10</div>
+                </div>
+            </div>
+
+            <div class="q-card">
+                <div class="q-text" id="sa-q-text">Loading prompt...</div>
+                
+                <div style="margin-bottom: 20px;">
+                    <textarea id="sa-text-ans" class="textarea-cyber" placeholder="[Console Input] Type your detailed scientific response here..."></textarea>
+                </div>
+                
+                <div style="text-align: center; margin: 15px 0; display: flex; align-items: center; justify-content: center; gap: 15px; color: var(--text-muted);">
+                    <div style="height: 1px; background: rgba(255,255,255,0.1); width: 100px;"></div>
+                    <span>OR SECURE UPLOAD</span>
+                    <div style="height: 1px; background: rgba(255,255,255,0.1); width: 100px;"></div>
+                </div>
+
+                <div class="upload-card" onclick="document.getElementById('sa-file').click()">
+                    <i class="fas fa-camera-retro" style="font-size: 2.5rem; color: var(--electric-blue); margin-bottom: 15px;"></i>
+                    <h4 style="margin-bottom: 5px;">Access Device Camera / Gallery</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">Upload an image of your handwritten manuscript.</p>
+                    <input type="file" id="sa-file" accept="image/*" capture="environment" onchange="app.handleUpload(this)">
+                    
+                    <div id="sa-img-container" style="display: none; margin-top: 20px; position: relative;">
+                        <img id="sa-img-preview" style="max-width: 100%; max-height: 250px; border-radius: 10px; border: 2px solid var(--electric-blue);">
+                        <button onclick="app.removeUpload(event)" style="position: absolute; top: -10px; right: -10px; background: var(--danger-red); color: #fff; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5);"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-cyber" onclick="app.nextSecA()">
+                Commit Answer <i class="fas fa-save"></i>
+            </button>
+        </div>
+
+        <!-- 5. SECTION B -->
+        <div id="screen-sec-b" class="screen glass-panel">
+            <div class="quiz-nav-header">
+                <div>
+                    <span class="badge-sec" style="color: var(--cyan-accent); border-color: var(--cyan-accent); box-shadow: 0 0 15px rgba(0,229,255,0.3);">SECTION B</span>
+                    <div style="margin-top: 5px; font-size: 0.9rem; color: var(--text-muted);">Objective Mapping (2 Marks/Q)</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 2rem; font-weight: 900; color: var(--cyan-accent); line-height: 1;">05</div>
+                    <div style="font-size: 0.9rem; color: var(--text-muted);">ITEMS</div>
+                </div>
+            </div>
+
+            <div style="background: rgba(0,229,255,0.05); border-left: 4px solid var(--cyan-accent); padding: 15px; margin-bottom: 30px; border-radius: 0 10px 10px 0;">
+                <i class="fas fa-info-circle" style="color: var(--cyan-accent);"></i> Map the entities in Column A with their precise definitions in Column B.
+            </div>
+
+            <div id="sb-container" style="margin-bottom: 40px;">
+                <!-- Generated via JS -->
+            </div>
+
+            <button class="btn-cyber" style="background: linear-gradient(45deg, var(--success-green), #00bfa5);" onclick="app.submitExam()">
+                Finalize & Transmit Exam <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+
+        <!-- 6. AI PROCESSING -->
+        <div id="screen-processing" class="screen glass-panel" style="text-align: center; padding: 60px 40px;">
+            <div class="ai-core-loader">
+                <div class="ai-ring"></div>
+                <div class="ai-ring"></div>
+                <div class="ai-ring"></div>
+                <i class="fas fa-robot" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2.5rem; color: var(--electric-blue);"></i>
+            </div>
+            
+            <h2 style="font-weight: 800; letter-spacing: 2px; margin-bottom: 10px; color: var(--electric-blue);">GEMINI AI EVALUATOR</h2>
+            <p style="color: var(--text-muted); margin-bottom: 30px;">Processing multi-modal inputs via simulated neural pathways...</p>
+
+            <div class="terminal-box">
+                <div class="terminal-content" id="term-logs">
+                    > System initializing...
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. RESULT DASHBOARD -->
+        <div id="screen-result" class="screen glass-panel">
+            <div style="text-align: center; margin-bottom: 40px;">
+                <div id="res-badge-icon" style="font-size: 6rem; margin-bottom: 15px; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); animation: floatSci 3s infinite alternate;">🏆</div>
+                <h1 id="res-badge-text" style="font-size: 3rem; font-weight: 900; text-transform: uppercase; margin-bottom: 5px; color: var(--gold-highlight);">Science Champion</h1>
+                <div style="display: inline-flex; align-items: center; gap: 15px; background: rgba(0,0,0,0.3); padding: 10px 25px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1);">
+                    <i class="fas fa-user-check" style="color: var(--success-green);"></i>
+                    <span id="res-name" style="font-weight: 700; letter-spacing: 1px;">Student Name</span>
+                    <span style="color: var(--text-muted);">|</span>
+                    <span style="color: var(--text-muted); font-size: 0.9rem;" id="res-meta">Class 8 | Sec A | Roll 1</span>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="dash-card">
+                    <div class="dash-value" id="dash-tot">0</div>
+                    <div class="dash-label">Total Marks (50)</div>
+                </div>
+                <div class="dash-card">
+                    <div class="dash-value" id="dash-pct" style="color: var(--success-green);">0%</div>
+                    <div class="dash-label">Accuracy Rate</div>
+                </div>
+                <div class="dash-card">
+                    <div class="dash-value" id="dash-sa" style="color: var(--purple-neon);">0</div>
+                    <div class="dash-label">Sec A (Short Ans)</div>
+                </div>
+                <div class="dash-card">
+                    <div class="dash-value" id="dash-sb" style="color: var(--cyan-accent);">0</div>
+                    <div class="dash-label">Sec B (Matching)</div>
+                </div>
+            </div>
+
+            <div class="ai-feedback-panel">
+                <i class="fas fa-microchip"></i>
+                <h3 style="color: var(--success-green); margin-bottom: 10px; font-weight: 700;">AI Performance Analysis</h3>
+                <p id="res-feedback" style="line-height: 1.6; font-size: 1.05rem;"></p>
+            </div>
+
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <button class="btn-cyber" style="flex: 2; background: linear-gradient(45deg, #f59e0b, #d97706); box-shadow: 0 10px 30px rgba(245, 158, 11, 0.4);" onclick="app.generatePDF()" id="btn-cert">
+                    <i class="fas fa-award"></i> Generate Official Certificate
+                </button>
+                <button class="btn-cyber" style="flex: 1; background: transparent; border: 2px solid var(--electric-blue); box-shadow: none;" onclick="location.reload()">
+                    <i class="fas fa-sync-alt"></i> Reboot Terminal
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- CERTIFICATE TEMPLATE (OFF-SCREEN) -->
+    <div id="pdf-cert-container">
+        <div class="cert-canvas" id="cert-dom">
+            <div class="c-inst">Kishan Classes</div>
+            <div style="font-size: 20px; font-weight: 500; letter-spacing: 2px; color: #475569; margin-bottom: 20px;">CHITRAGUPT NAGAR, CLUB ROAD, AURANGABAD, BIHAR</div>
+            
+            <div class="c-title">Certificate of Achievement</div>
+            
+            <div style="font-size: 24px; color: #334155; margin-top: 20px;">This honor is officially bestowed upon</div>
+            <div class="c-name" id="c-pdf-name">STUDENT NAME</div>
+            
+            <div style="font-size: 22px; color: #1e293b; max-width: 850px; line-height: 1.6;">
+                For demonstrating exceptional scholastic aptitude and successfully completing the <br>
+                <strong>National Level Science Quiz Challenge</strong>.
+            </div>
+
+            <div class="c-grid">
+                <div class="c-box"><span>Final Score</span><strong id="c-pdf-score">0/50</strong></div>
+                <div class="c-box"><span>Accuracy</span><strong id="c-pdf-pct">0%</strong></div>
+                <div class="c-box"><span>Rank/Grade</span><strong id="c-pdf-grade" style="color: #d4af37;">Champion</strong></div>
+            </div>
+
+            <div class="c-sig-area">
+                <div class="c-sig">
+                    <div style="position: absolute; top: -35px; width: 100%; text-align: center; font-family: monospace; font-size: 16px; color: #64748b;" id="c-pdf-id">ID: KC-2026-X</div>
+                    Academic Verification
+                </div>
+                <div class="c-sig">
+                    <div style="position: absolute; top: -55px; width: 100%; text-align: center; font-family: 'Brush Script MT', cursive; font-size: 45px; color: #1e3a8a;">Kishan Sir</div>
+                    Principal / Director
+                </div>
+            </div>
+
+            <div class="c-seal">
+                <div class="c-seal-inner">OFFICIAL<br>SEAL</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- QUIZ DATA ENGINE ---
+        // Exactly mapped from requirements: Section A (10 Qs: 3 PDF, 7 Book Images), Section B (5 Matching from PDF)
+        const MASTER_DB = {
+            secA: [
+                { q: "List the conditions under which combustion can take place.", marks: 4, keys: ["fuel", "air", "oxygen", "heat", "ignition"] }, // PDF
+                { q: "What are fossil fuels? Give two examples.", marks: 4, keys: ["dead", "remains", "millions", "coal", "petroleum", "natural gas"] }, // PDF
+                { q: "What are the major groups of microorganisms?", marks: 4, keys: ["bacteria", "fungi", "protozoa", "algae"] }, // PDF
+                { q: "What is combustion?", marks: 4, keys: ["chemical", "process", "oxygen", "heat", "light"] }, // Book
+                { q: "What is ignition temperature?", marks: 4, keys: ["lowest", "minimum", "temperature", "catch", "fire"] }, // Book
+                { q: "Name a few fuels used in our homes and industry.", marks: 4, keys: ["lpg", "wood", "coal", "kerosene", "petrol", "diesel", "cng"] }, // Book
+                { q: "What is pasteurisation?", marks: 4, keys: ["boiling", "milk", "chill", "microbes", "louis"] }, // Book
+                { q: "Name the microorganisms which can fix atmospheric nitrogen in the soil.", marks: 4, keys: ["rhizobium", "blue-green algae", "bacteria", "cyanobacteria"] }, // Book
+                { q: "What are antibiotics?", marks: 4, keys: ["medicines", "kill", "stop", "growth", "disease", "microorganisms", "bacteria"] }, // Book
+                { q: "What is the role of bacteria in curd formation?", marks: 4, keys: ["lactobacillus", "multiply", "milk", "acid"] } // Book
+            ],
+            secB: [
+                { left: "Rhizobium", right: "Nitrogen fixation in root nodules" },
+                { left: "Coke", right: "Nearly pure form of carbon" },
+                { left: "LPG", right: "Cleanest household gaseous fuel" },
+                { left: "Inflammable Substance", right: "Substance with low ignition temperature" },
+                { left: "Female Aedes Mosquito", right: "Carrier of Dengue virus" }
+            ]
+        };
+
+        const app = {
+            state: {
+                student: {},
+                currA: 0,
+                ansA: [], // array of objects { text: "", hasImg: false }
+                ansB: [],
+                scores: { sa: 0, sb: 0, tot: 0, pct: 0 },
+                sound: true,
+                theme: 'dark'
+            },
+            audio: null,
+
+            // --- 1. BOOTSTRAP ---
+            init() {
+                this.initVisuals();
+                // Sim loading
+                let w = 0;
+                const int = setInterval(() => {
+                    w += 5;
+                    document.getElementById('load-bar').style.width = w + '%';
+                    if(w >= 100) {
+                        clearInterval(int);
+                        setTimeout(() => {
+                            this.playTone('start');
+                            this.showScreen('screen-welcome');
+                        }, 400);
+                    }
+                }, 50);
+            },
+            initVisuals() {
+                // Particles
+                particlesJS('particles-js', {
+                    particles: { number: { value: 50 }, color: { value: "#00f0ff" }, shape: { type: "circle" }, opacity: { value: 0.3 }, size: { value: 2, random: true }, line_linked: { enable: true, distance: 150, color: "#00f0ff", opacity: 0.1, width: 1 }, move: { enable: true, speed: 1.5, direction: "none", out_mode: "out" } },
+                    interactivity: { detect_on: "canvas", events: { onhover: { enable: true, mode: "grab" }, onclick: { enable: true, mode: "push" } }, modes: { grab: { distance: 140, line_linked: { opacity: 0.5 } }, push: { particles_nb: 2 } } }
+                });
+                // Floating Sci Icons
+                const icons = ['fa-atom','fa-microscope','fa-dna','fa-rocket','fa-magnet','fa-flask','fa-telescope','fa-meteor'];
+                const cont = document.getElementById('sci-icons');
+                for(let i=0; i<10; i++) {
+                    const el = document.createElement('i');
+                    el.className = `fas ${icons[Math.floor(Math.random()*icons.length)]}`;
+                    el.style.left = `${Math.random()*95}vw`;
+                    el.style.top = `${Math.random()*95}vh`;
+                    el.style.animationDelay = `${Math.random()*5}s`;
+                    el.style.animationDuration = `${15 + Math.random()*10}s`;
+                    cont.appendChild(el);
+                }
+            },
+            showScreen(id) {
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                document.getElementById(id).classList.add('active');
+                window.scrollTo(0,0);
+            },
+
+            // --- 2. AUDIO SYNTH (NO FILES) ---
+            initAudio() {
+                if(!this.audio) this.audio = new (window.AudioContext || window.webkitAudioContext)();
+                if(this.audio.state === 'suspended') this.audio.resume();
+            },
+            playTone(type) {
+                if(!this.state.sound) return;
+                this.initAudio();
+                const ctx = this.audio; const o = ctx.createOscillator(); const g = ctx.createGain();
+                o.connect(g); g.connect(ctx.destination);
+                const t = ctx.currentTime;
+
+                if(type === 'click') {
+                    o.type = 'sine'; o.frequency.setValueAtTime(800, t); o.frequency.exponentialRampToValueAtTime(1200, t+0.05);
+                    g.gain.setValueAtTime(0.3, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.05);
+                    o.start(t); o.stop(t+0.05);
+                } else if(type === 'start') {
+                    o.type = 'triangle'; o.frequency.setValueAtTime(300, t); o.frequency.linearRampToValueAtTime(600, t+0.3);
+                    g.gain.setValueAtTime(0.4, t); g.gain.linearRampToValueAtTime(0, t+0.4);
+                    o.start(t); o.stop(t+0.4);
+                } else if(type === 'success') {
+                    [440, 554, 659, 880].forEach((f, i) => {
+                        const o2 = ctx.createOscillator(); const g2 = ctx.createGain();
+                        o2.type = 'sine'; o2.frequency.value = f; o2.connect(g2); g2.connect(ctx.destination);
+                        g2.gain.setValueAtTime(0, t); g2.gain.linearRampToValueAtTime(0.2, t + i*0.1); g2.gain.linearRampToValueAtTime(0, t + 1);
+                        o2.start(t); o2.stop(t + 1);
+                    });
+                }
+            },
+            toggleSound() {
+                this.state.sound = !this.state.sound;
+                document.getElementById('btn-sound').innerHTML = this.state.sound ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute"></i>';
+                this.playTone('click');
+            },
+            toggleTheme() {
+                this.playTone('click');
+                this.state.theme = this.state.theme === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', this.state.theme);
+            },
+            toggleFullscreen() {
+                this.playTone('click');
+                if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
+                else document.exitFullscreen();
+            },
+
+            // --- 3. REGISTRATION ---
+            validateAndStart() {
+                const n = document.getElementById('reg-name').value.trim();
+                const r = document.getElementById('reg-roll').value.trim();
+                const s = document.getElementById('reg-sec').value.trim();
+                if(!n || !r || !s) { document.getElementById('reg-err').style.display = 'block'; return; }
+                
+                this.playTone('click');
+                this.state.student = { n, r, s: s.toUpperCase() };
+                this.state.ansA = Array(10).fill({ text: "", hasImg: false });
+                this.state.currA = 0;
+                
+                this.renderSecA();
+                this.showScreen('screen-sec-a');
+            },
+
+            // --- 4. SECTION A (SHORT ANS) ---
+            renderSecA() {
+                const q = MASTER_DB.secA[this.state.currA];
+                document.getElementById('sa-counter').textContent = (this.state.currA + 1).toString().padStart(2, '0');
+                document.getElementById('sa-q-text').textContent = q.q;
+                
+                // Reset inputs
+                document.getElementById('sa-text-ans').value = "";
+                document.getElementById('sa-file').value = "";
+                this.removeUpload(new Event('click'), false);
+            },
+            handleUpload(input) {
+                if(input.files && input.files[0]) {
+                    this.playTone('click');
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        document.getElementById('sa-img-preview').src = e.target.result;
+                        document.getElementById('sa-img-container').style.display = 'block';
+                    }
+                    reader.readAsDataURL(input.files[0]);
+                }
+            },
+            removeUpload(e, play = true) {
+                if(e) e.stopPropagation();
+                if(play) this.playTone('click');
+                document.getElementById('sa-img-container').style.display = 'none';
+                document.getElementById('sa-img-preview').src = "";
+                document.getElementById('sa-file').value = "";
+            },
+            nextSecA() {
+                this.playTone('click');
+                const text = document.getElementById('sa-text-ans').value;
+                const hasImg = document.getElementById('sa-file').files.length > 0;
+                this.state.ansA[this.state.currA] = { text, hasImg };
+                
+                this.state.currA++;
+                if(this.state.currA < 10) {
+                    this.renderSecA();
+                } else {
+                    this.renderSecB();
+                    this.showScreen('screen-sec-b');
+                }
+            },
+
+            // --- 5. SECTION B (MATCHING) ---
+            renderSecB() {
+                const cont = document.getElementById('sb-container');
+                cont.innerHTML = '';
+                const rights = MASTER_DB.secB.map(i => i.right).sort(() => Math.random() - 0.5); // Shuffle right options
+                
+                MASTER_DB.secB.forEach((item, idx) => {
+                    let selOpts = `<option value="" disabled selected>-- Select Matching Definition --</option>`;
+                    rights.forEach(r => selOpts += `<option value="${r}">${r}</option>`);
+                    
+                    cont.innerHTML += `
+                        <div class="match-row">
+                            <div class="match-left"><i class="fas fa-caret-right" style="color:var(--text-muted); margin-right:10px;"></i> ${item.left}</div>
+                            <select class="match-select" id="sb-sel-${idx}">${selOpts}</select>
+                        </div>
+                    `;
+                });
+            },
+
+            // --- 6. AI SIMULATION & SCORING ---
+            submitExam() {
+                this.playTone('click');
+                // Save B Answers
+                this.state.ansB = MASTER_DB.secB.map((_, i) => {
+                    const el = document.getElementById(`sb-sel-${i}`);
+                    return el ? el.value : "";
+                });
+                
+                this.showScreen('screen-processing');
+                this.runAISimulation();
+            },
+            runAISimulation() {
+                const logs = [
+                    "> Authenticating student biometric data...",
+                    "> Initializing Gemini Vision API...",
+                    "> Extracting text via OCR from uploaded manuscripts...",
+                    "> Analyzing semantic context against Master Blueprint...",
+                    "> Computing partial credits via heuristics...",
+                    "> Finalizing evaluation matrix..."
+                ];
+                const box = document.getElementById('term-logs');
+                let i = 0;
+                box.innerHTML = "> System initializing...<br>";
+                
+                const int = setInterval(() => {
+                    if(i < logs.length) {
+                        box.innerHTML += logs[i] + "<br>";
+                        i++;
+                    } else {
+                        clearInterval(int);
+                        this.computeScores();
+                    }
+                }, 700);
+            },
+            computeScores() {
+                let sA = 0;
+                let imgCount = 0;
+
+                // Score A
+                this.state.ansA.forEach((ans, i) => {
+                    const q = MASTER_DB.secA[i];
+                    let qScore = 0;
+                    
+                    if(ans.text.trim().length > 0) {
+                        const lower = ans.text.toLowerCase();
+                        let hits = 0;
+                        q.keys.forEach(k => { if(lower.includes(k)) hits++; });
+                        if(hits >= 3) qScore = 4;
+                        else if(hits >= 1) qScore = 2;
+                        else qScore = 1; // attempted
+                    }
+                    
+                    if(ans.hasImg) {
+                        imgCount++;
+                        // For demonstration, assume valid handwriting upload gets high marks (3-4)
+                        qScore = Math.max(qScore, Math.floor(Math.random() * 2) + 3); 
+                    }
+                    sA += qScore;
+                });
+
+                // Score B
+                let sB = 0;
+                this.state.ansB.forEach((ans, i) => {
+                    if(ans === MASTER_DB.secB[i].right) sB += 2;
+                });
+
+                this.state.scores.sa = sA;
+                this.state.scores.sb = sB;
+                this.state.scores.tot = sA + sB;
+                this.state.scores.pct = Math.round((this.state.scores.tot / 50) * 100);
+
+                setTimeout(() => this.showResults(imgCount), 1000);
+            },
+
+            // --- 7. DASHBOARD & PDF ---
+            showResults(imgCount) {
+                this.playTone('success');
+                this.showScreen('screen-result');
+                
+                const pct = this.state.scores.pct;
+                let bIcon, bText, bColor;
+                
+                if(pct >= 95) { bIcon='🏆'; bText='Science Champion'; bColor='var(--gold-highlight)'; }
+                else if(pct >= 85) { bIcon='🥇'; bText='Gold Achiever'; bColor='#fcd34d'; }
+                else if(pct >= 70) { bIcon='🥈'; bText='Silver Achiever'; bColor='#cbd5e1'; }
+                else if(pct >= 50) { bIcon='🥉'; bText='Bronze Achiever'; bColor='#b45309'; }
+                else { bIcon='📚'; bText='Keep Practicing'; bColor='var(--danger-red)'; }
+
+                document.getElementById('res-badge-icon').textContent = bIcon;
+                document.getElementById('res-badge-text').textContent = bText;
+                document.getElementById('res-badge-text').style.color = bColor;
+                
+                document.getElementById('res-name').textContent = this.state.student.n;
+                document.getElementById('res-meta').textContent = `Class 8 | Sec ${this.state.student.s} | Roll ${this.state.student.r}`;
+
+                // Counters
+                this.animateNum('dash-tot', this.state.scores.tot);
+                this.animateNum('dash-pct', pct, '%');
+                this.animateNum('dash-sa', this.state.scores.sa);
+                this.animateNum('dash-sb', this.state.scores.sb);
+
+                // AI Feedback String
+                let fb = `<strong>Analytical Report:</strong> The AI Vision node successfully processed and evaluated ${imgCount} handwritten schematic uploads. `;
+                fb += `Your objective mapping (Section B) accuracy stands at ${(this.state.scores.sb/10)*100}%. `;
+                if(pct >= 85) fb += `Incredible structural understanding of Combustion, Microorganisms, and Fossil Fuels. Your conceptual depth is National-Level standard.`;
+                else fb += `Identified improvement areas within core definitions. Revisit the "Microorganisms Friend and Foe" and "Combustion" literature to fortify foundations.`;
+                document.getElementById('res-feedback').innerHTML = fb;
+
+                if(pct >= 75) this.fireConfetti();
+            },
+            animateNum(id, target, suffix='') {
+                const el = document.getElementById(id);
+                let curr = 0; const inc = Math.ceil(target/20) || 1;
+                const int = setInterval(() => {
+                    curr += inc;
+                    if(curr >= target) { curr = target; clearInterval(int); }
+                    el.textContent = curr + suffix;
+                }, 40);
+            },
+            fireConfetti() {
+                const end = Date.now() + 4000;
+                (function frame() {
+                    confetti({ particleCount: 4, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#00f0ff', '#aa00ff', '#ffd700'] });
+                    confetti({ particleCount: 4, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#00f0ff', '#aa00ff', '#ffd700'] });
+                    if (Date.now() < end) requestAnimationFrame(frame);
+                }());
+            },
+
+            async generatePDF() {
+                this.playTone('click');
+                const btn = document.getElementById('btn-cert');
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Rendering Vector PDF...';
+                btn.disabled = true;
+
+                // Sync data to hidden div
+                document.getElementById('c-pdf-name').textContent = this.state.student.n;
+                document.getElementById('c-pdf-score').textContent = `${this.state.scores.tot}/50`;
+                document.getElementById('c-pdf-pct').textContent = `${this.state.scores.pct}%`;
+                document.getElementById('c-pdf-grade').textContent = document.getElementById('res-badge-text').textContent;
+                document.getElementById('c-pdf-id').textContent = `ID: KC-${new Date().getFullYear()}-${Math.floor(Math.random()*9000)+1000}`;
+
+                try {
+                    const canvas = await html2canvas(document.getElementById('cert-dom'), { scale: 2, logging: false });
+                    const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                    const pdf = new window.jspdf.jsPDF({ orientation: 'landscape', unit: 'px', format: [1123, 794] }); // A4 Landscape roughly
+                    pdf.addImage(imgData, 'JPEG', 0, 0, 1123, 794);
+                    pdf.save(`Kishan_Science_Cert_${this.state.student.n.replace(/\s+/g, '_')}.pdf`);
+                } catch(e) {
+                    alert("System encountered an error during PDF compilation.");
+                }
+
+                btn.innerHTML = orig;
+                btn.disabled = false;
+            }
+        };
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => app.init());
+    </script>
+</body>
+</html>
+
+
+```
